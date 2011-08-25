@@ -11,8 +11,6 @@
  *******************************************************************************/
 package org.eclipse.pde.internal.launching.sourcelookup;
 
-import org.eclipse.pde.internal.launching.PDELaunchingPlugin;
-
 import java.io.File;
 import java.util.*;
 import org.eclipse.core.filesystem.URIUtil;
@@ -26,8 +24,9 @@ import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.sourcelookup.containers.JavaSourceLookupParticipant;
 import org.eclipse.pde.core.plugin.*;
-import org.eclipse.pde.internal.core.PDEClasspathContainer;
-import org.eclipse.pde.internal.core.TargetPlatformHelper;
+import org.eclipse.pde.core.spi.IBundleClasspathResolver;
+import org.eclipse.pde.internal.core.*;
+import org.eclipse.pde.internal.launching.PDELaunchingPlugin;
 
 public class PDESourceLookupDirector extends AbstractSourceLookupDirector {
 
@@ -209,6 +208,15 @@ public class PDESourceLookupDirector extends AbstractSourceLookupDirector {
 					result.add(rte);
 			}
 		}
+
+		IBundleClasspathResolver[] resolvers = getClasspathContainerResolver(project);
+		for (int i = 0; i < resolvers.length; i++) {
+			result.addAll(resolvers[i].getSourceLookupPath(jProject));
+		}
+	}
+
+	private IBundleClasspathResolver[] getClasspathContainerResolver(IProject project) {
+		return PDECore.getDefault().getClasspathContainerResolverManager().getBundleClasspathResolvers(project);
 	}
 
 	/* (non-Javadoc)

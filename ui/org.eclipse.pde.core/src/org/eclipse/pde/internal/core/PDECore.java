@@ -130,6 +130,7 @@ public class PDECore extends Plugin {
 	private SourceLocationManager fSourceLocationManager;
 	private JavadocLocationManager fJavadocLocationManager;
 	private SearchablePluginsManager fSearchablePluginsManager;
+	private ClasspathContainerResolverManager fClasspathContainerResolverManager;
 
 	// Tracing options manager
 	private TracingOptionsManager fTracingOptionsManager;
@@ -213,6 +214,13 @@ public class PDECore extends Plugin {
 		if (fSourceLocationManager == null)
 			fSourceLocationManager = new SourceLocationManager();
 		return fSourceLocationManager;
+	}
+
+	public synchronized ClasspathContainerResolverManager getClasspathContainerResolverManager() {
+		if (fClasspathContainerResolverManager == null) {
+			fClasspathContainerResolverManager = new ClasspathContainerResolverManager();
+		}
+		return fClasspathContainerResolverManager;
 	}
 
 	public synchronized JavadocLocationManager getJavadocLocationManager() {

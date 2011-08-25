@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.pde.core.build.IBuild;
 import org.eclipse.pde.core.build.IBuildEntry;
 import org.eclipse.pde.core.plugin.*;
+import org.eclipse.pde.core.spi.IBundleClasspathResolver;
 import org.eclipse.pde.internal.core.build.WorkspaceBuildModel;
 import org.eclipse.pde.internal.core.project.PDEProject;
 
@@ -201,7 +202,28 @@ public class ClasspathHelper {
 				map.put(source, list);
 			}
 		}
+
+		IBundleClasspathResolver[] resolvers = getBundleClasspathResolvers(project);
+		for (int i = 0; i < resolvers.length; i++) {
+			Map resolved = resolvers[i].getClasspathMap(jProject);
+			Iterator resolvedIter = resolved.entrySet().iterator();
+			while (resolvedIter.hasNext()) {
+				Map.Entry resolvedEntry = (Map.Entry) resolvedIter.next();
+				IPath ceSource = (IPath) resolvedEntry.getKey();
+				ArrayList list = (ArrayList) map.get(ceSource);
+				if (list == null) {
+					list = new ArrayList();
+					map.put(ceSource, list);
+				}
+				list.addAll((Collection) resolvedEntry.getValue());
+			}
+		}
+
 		return map;
+	}
+
+	private static IBundleClasspathResolver[] getBundleClasspathResolvers(IProject project) {
+		return PDECore.getDefault().getClasspathContainerResolverManager().getBundleClasspathResolvers(project);
 	}
 
 	// find the corresponding paths for a library name.  Searches for source folders first, but includes any libraries on the buildpath with the same name
@@ -231,6 +253,8 @@ public class ClasspathHelper {
 			IResource res = project.findMember(libName);
 			if (res != null)
 				path = res.getFullPath();
+			else
+				path = new Path(libName);
 		}
 
 		ArrayList list = (ArrayList) classpathMap.get(path);
